@@ -31,6 +31,7 @@ class CategorySelector extends StatelessWidget {
               category == 'All' ? 'All' : NewsCategories.label(category),
             ),
             selected: isSelected,
+            checkmarkColor: Colors.white,
             onSelected: (_) => onSelected(category),
           );
         },
