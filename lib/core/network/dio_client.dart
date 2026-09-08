@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -41,9 +42,18 @@ class _ApiKeyInterceptor extends Interceptor {
 }
 
 class _LoggingInterceptor extends Interceptor {
+  final _encoder = const JsonEncoder.withIndent('  ');
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     debugPrint('➡️  ${options.method} ${options.uri}');
+    if (options.data != null) {
+      try {
+        debugPrint('📦 Request Body:\n${_encoder.convert(options.data)}');
+      } catch (_) {
+        debugPrint('📦 Request Body: ${options.data}');
+      }
+    }
     handler.next(options);
   }
 
@@ -53,6 +63,13 @@ class _LoggingInterceptor extends Interceptor {
       '✅ ${response.requestOptions.method} '
       '${response.requestOptions.uri} -> ${response.statusCode}',
     );
+    if (response.data != null) {
+      try {
+        debugPrint('📄 Response Body:\n${_encoder.convert(response.data)}');
+      } catch (_) {
+        debugPrint('📄 Response Body: ${response.data}');
+      }
+    }
     handler.next(response);
   }
 
@@ -62,6 +79,15 @@ class _LoggingInterceptor extends Interceptor {
       '❌ ${err.requestOptions.method} ${err.requestOptions.uri} -> '
       '${err.error ?? err.message}',
     );
+    if (err.response?.data != null) {
+      try {
+        debugPrint(
+          '📄 Error Response Body:\n${_encoder.convert(err.response?.data)}',
+        );
+      } catch (_) {
+        debugPrint('📄 Error Response Body: ${err.response?.data}');
+      }
+    }
     handler.next(err);
   }
 }
