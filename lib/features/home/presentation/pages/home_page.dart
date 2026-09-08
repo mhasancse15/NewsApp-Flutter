@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/failure_message_mapper.dart';
+import '../../../../core/widgets/article_card.dart';
 import '../../../../core/widgets/skeleton_loaders.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../domain/entities/article.dart';
@@ -89,36 +91,62 @@ class HomePage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (breakingNews.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('🔥 Breaking News'),
-                ),
-                const SizedBox(height: 12),
-                BreakingNewsCarousel(
-                  articles: breakingNews,
-                  onArticleTap: (a) => _openArticle(context, a),
-                ),
-                const SizedBox(height: 24),
-              ],
-              for (final entry in sections.entries) ...[
-                if (entry.key == 'sports')
+              if (viewModel.selectedCategory == NewsCategories.alltab) ...[
+                if (breakingNews.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('🔥 Breaking News'),
+                  ),
+                  const SizedBox(height: 12),
+                  BreakingNewsCarousel(
+                    articles: breakingNews,
+                    onArticleTap: (a) => _openArticle(context, a),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                for (final entry in sections.entries) ...[
+                  if (entry.key == 'sports')
+                    VerticalNewsSection(
+                      category: entry.key,
+                      articles: entry.value,
+                      emoji: _sectionEmoji[entry.key],
+                      onArticleTap: (a) => _openArticle(context, a),
+                      onSeeAll: () => context.push('/category/${entry.key}'),
+                    )
+                  else
+                    NewsSection(
+                      category: entry.key,
+                      articles: entry.value,
+                      emoji: _sectionEmoji[entry.key],
+                      onArticleTap: (a) => _openArticle(context, a),
+                      onSeeAll: () => context.push('/category/${entry.key}'),
+                    ),
+                  const SizedBox(height: 24),
+                ],
+              ] else ...[
+                if (breakingNews.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SizedBox(
+                      height: 200,
+                      child: BreakingNewsCard(
+                        article: breakingNews.first,
+                        onTap: () => _openArticle(context, breakingNews.first),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                for (final entry in sections.entries) ...[
                   VerticalNewsSection(
                     category: entry.key,
                     articles: entry.value,
                     emoji: _sectionEmoji[entry.key],
                     onArticleTap: (a) => _openArticle(context, a),
                     onSeeAll: () => context.push('/category/${entry.key}'),
-                  )
-                else
-                  NewsSection(
-                    category: entry.key,
-                    articles: entry.value,
-                    emoji: _sectionEmoji[entry.key],
-                    onArticleTap: (a) => _openArticle(context, a),
-                    onSeeAll: () => context.push('/category/${entry.key}'),
                   ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
+                ],
               ],
             ],
           ),

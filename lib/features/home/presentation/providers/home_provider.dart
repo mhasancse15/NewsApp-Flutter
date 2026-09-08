@@ -46,7 +46,7 @@ class HomeError extends HomeState {
 /// selected filter) plus one horizontal rail per remaining category.
 class HomeViewModel extends Notifier<HomeState> {
   late final GetTopHeadlinesUseCase _getTopHeadlines;
-  String _selectedCategory = 'All';
+  String _selectedCategory = NewsCategories.alltab;
 
   String get selectedCategory => _selectedCategory;
 
@@ -67,35 +67,59 @@ class HomeViewModel extends Notifier<HomeState> {
   Future<void> _load() async {
     state = const HomeLoading();
 
-    final breakingResult = await _getTopHeadlines(
-      GetTopHeadlinesParams(
-        country: AppDefaults.country,
-        category:
-            _selectedCategory == 'All' ? null : _selectedCategory.toLowerCase(),
-        pageSize: 8,
-      ),
-    );
+    if (_selectedCategory == NewsCategories.alltab) {
+      final breakingResult = await _getTopHeadlines(
+        GetTopHeadlinesParams(
+          country: AppDefaults.country,
+          pageSize: 8,
+        ),
+      );
 
-    await breakingResult.match(
-      (failure) async => state = HomeError(failure),
-      (breaking) async {
-        final Map<String, List<Article>> sections = {};
-        for (final category in NewsCategories.homeSelector.skip(1)) {
-          final sectionResult = await _getTopHeadlines(
-            GetTopHeadlinesParams(
-              country: AppDefaults.country,
-              category: category,
-              pageSize: 6,
-            ),
-          );
-          sectionResult.match(
-            (_) => sections[category] = const [],
-            (articles) => sections[category] = articles,
-          );
-        }
-        state = HomeLoaded(breakingNews: breaking, sections: sections);
-      },
-    );
+      await breakingResult.match(
+        (failure) async => state = HomeError(failure),
+        (breaking) async {
+          final Map<String, List<Article>> sections = {};
+          for (final category in NewsCategories.homeSelector.skip(1)) {
+            final sectionResult = await _getTopHeadlines(
+              GetTopHeadlinesParams(
+                country: AppDefaults.country,
+                category: category,
+                pageSize: 6,
+              ),
+            );
+            sectionResult.match(
+              (_) => sections[category] = const [],
+              (articles) => sections[category] = articles,
+            );
+          }
+          state = HomeLoaded(breakingNews: breaking, sections: sections);
+        },
+      );
+    } else {
+      final result = await _getTopHeadlines(
+        GetTopHeadlinesParams(
+          country: AppDefaults.country,
+          category: _selectedCategory.toLowerCase(),
+          pageSize: 20,
+        ),
+      );
+
+      result.match(
+        (failure) async => state = HomeError(failure),
+        (articles) async {
+          if (articles.isEmpty) {
+            state = const HomeLoaded(breakingNews: [], sections: {});
+          } else {
+            state = HomeLoaded(
+              breakingNews: [articles.first],
+              sections: {
+                _selectedCategory.toLowerCase(): articles.skip(1).toList(),
+              },
+            );
+          }
+        },
+      );
+    }
   }
 }
 
