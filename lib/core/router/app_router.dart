@@ -53,7 +53,7 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/more',
+              path: '/setting',
               builder: (context, state) => const MorePage(),
             ),
           ],

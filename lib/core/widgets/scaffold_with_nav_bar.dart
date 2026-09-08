@@ -38,9 +38,9 @@ class ScaffoldWithNavBar extends StatelessWidget {
             label: 'Categories',
           ),
           NavigationDestination(
-            icon: Icon(Icons.more_horiz_rounded),
-            selectedIcon: Icon(Icons.more_horiz_rounded),
-            label: 'More',
+            icon: Icon(Icons.settings),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Setting',
           ),
         ],
       ),
