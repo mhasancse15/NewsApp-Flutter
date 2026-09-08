@@ -39,27 +39,27 @@ class HomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: viewModel.refresh,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  HomeSearchBar(onTap: () => context.push('/search')),
-                  const SizedBox(height: 12),
-                  CategorySelector(
-                    selected: viewModel.selectedCategory,
-                    onSelected: viewModel.selectCategory,
-                  ),
-                  const SizedBox(height: 16),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          HomeSearchBar(onTap: () => context.push('/search')),
+          const SizedBox(height: 12),
+          CategorySelector(
+            selected: viewModel.selectedCategory,
+            onSelected: viewModel.selectCategory,
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: viewModel.refresh,
+              child: CustomScrollView(
+                slivers: [
+                  _buildBody(context, state, viewModel),
                 ],
               ),
             ),
-            _buildBody(context, state, viewModel),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
